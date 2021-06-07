@@ -1,16 +1,23 @@
 name: cmip6_derived_cloud_datasets
 channels: 
     - conda-forge
-dependencies: 
+dependencies:
     - python
     - dask
     - zarr
     - distributed
+    - cmip6_preprocessing
     - coiled
     - xarray
     - intake-esm
-    - cmip6_preprocessing
+    - prefect
     - ipykernel
     - ipywidgets
     - rechunker
+    - matplotlib
+    - prefect
+    - dask-gateway
+#     - pip
+#     - pip: 
+#         - git+https://github.com/jbusecke/cmip6_preprocessing
     
