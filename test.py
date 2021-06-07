@@ -85,11 +85,11 @@ if __name__=="__main__":
     env_name = "cmip6_derived_cloud_datasets"
     
 
-    ## use the pangeo containerfor the software env
-    coiled.create_software_environment(
-        name=env_name,
-        container='pangeo/pangeo-notebook:2021.02.02',   # matches Pangeo Cloud AWS production cluster
-    )
+#     ## use the pangeo containerfor the software env
+#     coiled.create_software_environment(
+#         name=env_name,
+#         container='pangeo/pangeo-notebook:2021.02.02',   # matches Pangeo Cloud AWS production cluster
+#     )
 
     # Create a Dask cluster which uses 
     # software environment
