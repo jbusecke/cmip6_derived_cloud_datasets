@@ -10,6 +10,8 @@ env_name = "cmip6_derived_cloud_datasets"
 ## use the pangeo containerfor the software env
 coiled.create_software_environment(
     name=env_name,
+#     conda='environment.yml', # this will take longer...but I guess thats ok for now?
+    # couldnt get this to work yet
     container='pangeo/pangeo-notebook:latest',   # matches Pangeo Cloud AWS production cluster
 )
 

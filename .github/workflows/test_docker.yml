@@ -1,0 +1,29 @@
+name: Test Flow with Docker Image
+on: [push]
+jobs:
+  build:
+    container:
+      image: pangeo/pangeo-notebook:latest
+      credentials:
+          username: ${{ secrets.DOCKERHUB_USER }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+    defaults:
+      run:
+        shell: bash -l {0}
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install coiled
+      run: conda install coiled -y
+    - name: Check enviroment
+      run: conda list
+    - name: Login to Coiled
+      run: coiled login -a ${{ secrets.COILED_USER }} -t ${{ secrets.COILED_TOKEN }}
+    - name: Run Script
+      run: python production_test_docker.py
+#     - name: Setup upterm session
+#       uses: lhotari/action-upterm@v1
+#     - name: Install package
+#       run: python -m pip install -e . --no-deps --force-reinstall
+      
+    
+
