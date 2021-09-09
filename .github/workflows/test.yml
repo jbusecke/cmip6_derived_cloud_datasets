@@ -11,8 +11,8 @@ jobs:
       run:
         shell: bash -l {0}
     runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
+#     steps:
+#     - uses: actions/checkout@v2
 #     - name: Cache conda
 #       uses: actions/cache@v2.1.6
 #       env:
