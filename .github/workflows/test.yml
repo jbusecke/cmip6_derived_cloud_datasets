@@ -3,7 +3,7 @@ on: [push]
 jobs:
   build:
     container:
-      image: pangeo:pangeo-notebook-latest
+      image: pangeo/pangeo-notebook:latest
       credentials:
           username: ${{ secrets.DOCKERHUB_USER }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
