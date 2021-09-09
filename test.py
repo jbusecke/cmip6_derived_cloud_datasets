@@ -1,30 +1,31 @@
-import os
-from prefect import task, Flow, Parameter
+from prefect import task, Flow, Parameter, unmapped
 from prefect.executors import DaskExecutor
+from prefect.tasks.prefect import StartFlowRun
 import intake
 import fsspec
 from cmip6_preprocessing.preprocessing import combined_preprocessing
-from distributed import Client
-import coiled
-
+from cmip6_preprocessing.utils import cmip6_dataset_id
 
 @task
-def load_ddict(**search_kwargs):
+def discovery_and_preprocess(**search_kwargs):
     col = intake.open_esm_datastore("https://cmip6-pds.s3.amazonaws.com/pangeo-cmip6.json")
     cat = col.search(**search_kwargs)
-    
-    return cat.to_dataset_dict(
+    ddict = cat.to_dataset_dict(
         zarr_kwargs={
             'consolidated':True,
-            'use_cftime':True
+            'use_cftime':True,
         },
+        storage_options={'anon':True},
         preprocess = combined_preprocessing,
         aggregate = False,
     )
-
-@task(nout=2)
-def choose_first_dataset(ddict):
-    return ddict.popitem()
+    
+    # This could contain some custom combination code
+    # for now just reduce the number of datasets
+    ddict_pp = {k:ddict[k] for k in list(ddict.keys())[0:3]}
+    
+    
+    return list(ddict_pp.values()) # need to return a list to map over....not ideal beause the resulting tasks are not labelled
     
 
 @task
@@ -34,34 +35,39 @@ def naive_mean(ds):
 
 @task
 def clean_ds_attrs(ds):
+    """Needed to save to zarr"""
     for attr in ['intake_esm_varname']:
         if attr in ds.attrs:
             del ds.attrs[attr]
     return ds
 
 @task
-def store_zarr(ds, ofolder, short, filename):
-    if short:
-        ds = ds.isel(time=slice(0,36))
-        filename = 'short_'+ filename
-        
-    mapper = fsspec.get_mapper(ofolder+'/'+filename)
-    print(f"Saving to {filename}")
-    ds.to_zarr(mapper, mode='w')
+def store_zarr(ds, ofolder):
+    # for testing just average the first 12 steps
+    ds = ds.isel(time=slice(0,36))
+#     filename = 'short_'+ cmip6_dataset_id(ds) +'.zarr'
+
+#     mapper = fsspec.get_mapper(ofolder+'/'+filename)
+#     print(f"Saving to {str(mapper)}")
+#     ds.to_zarr(mapper, mode='w')
+#     return str(mapper)
+
+    # drop in replacement (just load for now, not save)
+    ds = ds.load()
+    print(ds)
+    return ds
+
     
-PANGEO_SCRATCH = os.environ['PANGEO_SCRATCH']
-scratch = f'{PANGEO_SCRATCH}/cmip6_derived'
     
 with Flow("Test-Mean-CMIP6") as flow:
-    source_id = Parameter("source_id", default="GFDL-CM4")
+    ofolder = Parameter("ofolder", default=None)
+    source_id = Parameter("source_id", default="CanESM5")
     variable_id = Parameter("variable_id", default="thetao")
     experiment_id = Parameter("experiment_id", default="historical")
     grid_label = Parameter("grid_label", default='gn')
     table_id = Parameter("table_id", default='Omon')
-    short = Parameter("short", default=False)
-    filename = Parameter("filename", default='just_some_test.zarr')
     
-    ddict = load_ddict(
+    datasets = discovery_and_preprocess(
         source_id=source_id,
         variable_id=variable_id,
         experiment_id=experiment_id,
@@ -69,33 +75,6 @@ with Flow("Test-Mean-CMIP6") as flow:
         table_id = table_id
     )
     
-    # for now just use the first one
-    ds_name, ds = choose_first_dataset(ddict)
-    
-    ds_mean = naive_mean(ds)
-    
-    ds_mean = clean_ds_attrs(ds_mean)
-    
-    store_zarr(ds_mean, scratch, short, filename)
-    
-    
-    
-if __name__=="__main__":
-    
-    env_name = "cmip6_derived_cloud_datasets"
-    
-
-#     ## use the pangeo containerfor the software env
-#     coiled.create_software_environment(
-#         name=env_name,
-#         container='pangeo/pangeo-notebook:2021.02.02',   # matches Pangeo Cloud AWS production cluster
-#     )
-
-    # Create a Dask cluster which uses 
-    # software environment
-    cluster = coiled.Cluster(software=env_name, n_workers=10)#,
-    client = Client(cluster)
-    print(client)
-    
-    coiled_executor = DaskExecutor(cluster)
-    flow_state = flow.run(executor=coiled_executor, filename='script_test.nc', short=False)
+    mapped_means = naive_mean.map(ds=datasets)
+    mapped_mean_clean = clean_ds_attrs.map(ds=mapped_means)
+    filepaths = store_zarr.map(ds=mapped_mean_clean, ofolder=unmapped(ofolder))
