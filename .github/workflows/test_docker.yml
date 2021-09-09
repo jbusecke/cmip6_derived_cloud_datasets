@@ -19,7 +19,7 @@ jobs:
     - name: Login to Coiled
       run: coiled login -a ${{ secrets.COILED_USER }} -t ${{ secrets.COILED_TOKEN }}
     - name: Run Script
-      run: python production_test.py
+      run: python production_test_docker.py
 #     - name: Setup upterm session
 #       uses: lhotari/action-upterm@v1
 #     - name: Install package
