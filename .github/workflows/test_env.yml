@@ -11,6 +11,10 @@ jobs:
          source_id: ["CanESM5", "GFDL-ESM4", "GFDL-CM4"]
     name: Build (${{ matrix.source_id }})
     steps:
+    - name: Cancel previous runs
+      uses: styfle/cancel-workflow-action@0.9.1
+      with:
+        access_token: ${{ github.token }}
     - uses: actions/checkout@v2
     - name: Cache conda
       uses: actions/cache@v2.1.6
