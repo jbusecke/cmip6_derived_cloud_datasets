@@ -6,6 +6,10 @@ jobs:
       run:
         shell: bash -l {0}
     runs-on: ubuntu-latest
+    strategy:
+       matrix:
+         source_id: ["CanESM5", "GFDL-ESM4", "GFDL-CM4"]
+    name: Build (${{ matrix.source_id }})
     steps:
     - uses: actions/checkout@v2
     - name: Cache conda
@@ -33,7 +37,7 @@ jobs:
     - name: Login to Coiled
       run: coiled login -a ${{ secrets.COILED_USER }} -t ${{ secrets.COILED_TOKEN }}
     - name: Run Script
-      run: python production_test_env.py
+      run: python production_test_env.py --source_id=${{matrix.source_id}}
 #     - name: Setup upterm session
 #       uses: lhotari/action-upterm@v1
 #     - name: Install package
