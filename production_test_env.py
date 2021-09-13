@@ -33,7 +33,7 @@ if __name__ == '__main__':
         shutdown_on_close=True,
     )
     client = Client(cluster)
-    print("Cluster Name:, cluster.name)
+    print("Cluster Name:", cluster.name)
     print("Dashboard:", client.dashboard_link)
     print('\n\n\n----------------------------')
 
