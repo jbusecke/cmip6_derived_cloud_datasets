@@ -44,7 +44,7 @@ def clean_ds_attrs(ds):
 @task
 def store_zarr(ds, ofolder):
     # for testing just average the first 12 steps
-    ds = ds.isel(time=slice(0,36))
+    ds = ds.isel(time=slice(0,240))
 #     filename = 'short_'+ cmip6_dataset_id(ds) +'.zarr'
 
 #     mapper = fsspec.get_mapper(ofolder+'/'+filename)

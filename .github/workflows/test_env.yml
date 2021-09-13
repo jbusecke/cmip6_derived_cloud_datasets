@@ -6,7 +6,15 @@ jobs:
       run:
         shell: bash -l {0}
     runs-on: ubuntu-latest
+    strategy:
+       matrix:
+         source_id: ["CanESM5", "GFDL-ESM4", "GFDL-CM4"]
+    name: Build (${{ matrix.source_id }})
     steps:
+    - name: Cancel previous runs
+      uses: styfle/cancel-workflow-action@0.9.1
+      with:
+        access_token: ${{ github.token }}
     - uses: actions/checkout@v2
     - name: Cache conda
       uses: actions/cache@v2.1.6
@@ -26,14 +34,12 @@ jobs:
         python-version: 3.9
         environment-file: environment.yml
         use-only-tar-bz2: true # IMPORTANT: This needs to be set for caching to work properly!
-    - name: Install coiled
-      run: conda install coiled -y
     - name: Check enviroment
       run: conda list
     - name: Login to Coiled
       run: coiled login -a ${{ secrets.COILED_USER }} -t ${{ secrets.COILED_TOKEN }}
     - name: Run Script
-      run: python production_test_env.py
+      run: python production_test_env.py --source_id=${{matrix.source_id}}
 #     - name: Setup upterm session
 #       uses: lhotari/action-upterm@v1
 #     - name: Install package

@@ -11,13 +11,10 @@ dependencies:
     - xarray
     - intake-esm
     - prefect
-    - ipykernel
-    - ipywidgets
-    - rechunker
-    - matplotlib
-    - prefect
-    - dask-gateway
-#     - pip
-#     - pip: 
-#         - git+https://github.com/jbusecke/cmip6_preprocessing
+    - click
+#     - ipykernel
+#     - ipywidgets
+#     - rechunker
+#     - matplotlib
+#     - dask-gateway
     
