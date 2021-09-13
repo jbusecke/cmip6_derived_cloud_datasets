@@ -28,12 +28,13 @@ if __name__ == '__main__':
     # Create a Dask cluster which uses 
     # software environment
     cluster = coiled.Cluster(
-        software=env_name, n_workers=10,
+        software=env_name, n_workers=3,
         backend_options={"region": "us-west-2"},
         shutdown_on_close=True,
     )
     client = Client(cluster)
-    print(print("Dashboard:", client.dashboard_link))
+    print("Cluster Name:, cluster.name)
+    print("Dashboard:", client.dashboard_link)
     print('\n\n\n----------------------------')
 
 
