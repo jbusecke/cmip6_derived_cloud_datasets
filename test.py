@@ -44,10 +44,6 @@ def clean_ds_attrs(ds):
 
 @task
 def store_zarr(ds, ofolder):
-    # quick test, to see if I can grabe the env variable from the CI
-    print('DOES THIS WORK?', os.environ['TEST'])
-    # for testing just average the first 12 steps
-    ds = ds.isel(time=slice(0,240))
     # TODO: Implement versioning?
     filename = 'short_'+ cmip6_dataset_id(ds) +'.zarr'
     mapper = fs.get_mapper(ofolder+'/'+filename)
@@ -56,7 +52,7 @@ def store_zarr(ds, ofolder):
     ds.to_zarr(mapper, mode='w')
     
 with Flow("Test-Mean-CMIP6") as flow:
-    ofolder = Parameter("ofolder", default=None)
+    ofolder = Parameter("ofolder", default=f's3://cmip6derivedtestacce-onbwidnxcpr9pskoen9asgg97wucnusw2b-s3alias/test_short')
     source_id = Parameter("source_id", default="CanESM5")
     variable_id = Parameter("variable_id", default="thetao")
     experiment_id = Parameter("experiment_id", default="historical")
@@ -77,7 +73,6 @@ with Flow("Test-Mean-CMIP6") as flow:
         key=os.environ['KEY'], 
         secret=os.environ['SECRET']
     )
-    ofolder = f's3://cmip6derivedtestacce-onbwidnxcpr9pskoen9asgg97wucnusw2b-s3alias/test_short'
     
     mapped_means = naive_mean.map(ds=datasets)
     mapped_mean_clean = clean_ds_attrs.map(ds=mapped_means)
