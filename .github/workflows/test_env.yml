@@ -39,7 +39,7 @@ jobs:
     - name: Login to Coiled
       env:
         USER: ${{secrets.COILED_USER}}
-        SECRET: ${{secrets.COILED_TOKEN}}
+        TOKEN: ${{secrets.COILED_TOKEN}}
       run: coiled login -a "$USER" -t "$TOKEN"
     - name: Run Script
       env:
