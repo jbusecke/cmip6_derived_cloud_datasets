@@ -37,8 +37,15 @@ jobs:
     - name: Check enviroment
       run: conda list
     - name: Login to Coiled
-      run: coiled login -a ${{ secrets.COILED_USER }} -t ${{ secrets.COILED_TOKEN }}
+      env:
+        USER: ${{secrets.COILED_USER}}
+        TOKEN: ${{secrets.COILED_TOKEN}}
+      run: coiled login -a "$USER" -t "$TOKEN"
     - name: Run Script
+      env:
+        KEY: ${{secrets.S3_KEY}}
+        SECRET: ${{secrets.S3_SECRET}}
+        TEST: "Just a TEST"
       run: python production_test_env.py --source_id=${{matrix.source_id}}
 #     - name: Setup upterm session
 #       uses: lhotari/action-upterm@v1
