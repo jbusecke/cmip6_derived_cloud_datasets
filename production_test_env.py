@@ -7,13 +7,6 @@ from test import flow
 # # Parse command line parameters
 import click
 
-@click.command()
-@click.option('--source_id', default='CanESM5', help='source_id')
-def run_flow(source_id):
-    flow.run(source_id=source_id)
-    
-@click.command()
-@click.option('--n_workers', default=6, help='Number of workers to spin up')
 def spin_up_cluster(n_workers):
     # set up the cluster before executing the run
     env_name = "cmip6_derived_cloud_datasets"
@@ -38,12 +31,21 @@ def spin_up_cluster(n_workers):
     print("Dashboard:", client.dashboard_link)
     print('\n\n\n----------------------------')
     return client, cluster
+
+@click.command()
+@click.option('--source_id', default='CanESM5', help='source_id')
+@click.option('--n_workers', default=6, help='Number of workers to spin up')
+def wrapper(source_id, n_workers):
+    flow.run(source_id=source_id)
     
-    
-if __name__ == '__main__':
-    
-    client, cluster = spin_up_cluster() 
-    run_flow()
+    client, cluster = spin_up_cluster(n_workers)
     
     coiled.delete_cluster(name=cluster.name)
     client.close()
+
+
+
+    
+    
+if __name__ == '__main__':
+    wrapper()
