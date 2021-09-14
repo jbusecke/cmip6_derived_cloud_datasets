@@ -44,7 +44,7 @@ jobs:
       run: coiled login -a "$USER" -t "$TOKEN"
     - name: Set cluster size based on source_id
       run: |
-          if [[ "${{matrix.source_id}}" == "GFDL-CM4"] || ["${{matrix.source_id}}" == "GFDL-ESM4"]]; then
+          if [[ "${{matrix.source_id}}" == "GFDL-CM4" ]] || [[ "${{matrix.source_id}}" == "GFDL-ESM4" ]] ; then
               echo "N_WORKER=12" >> "$GITHUB_ENV"
           else
               echo "N_WORKER=6" >> "$GITHUB_ENV"
