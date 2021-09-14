@@ -44,10 +44,6 @@ def clean_ds_attrs(ds):
 
 @task
 def store_zarr(ds, ofolder):
-    # quick test, to see if I can grabe the env variable from the CI
-    print('DOES THIS WORK?', os.environ['TEST'])
-    # for testing just average the first 12 steps
-    ds = ds.isel(time=slice(0,240))
     # TODO: Implement versioning?
     filename = 'short_'+ cmip6_dataset_id(ds) +'.zarr'
     mapper = fs.get_mapper(ofolder+'/'+filename)
