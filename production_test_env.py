@@ -36,16 +36,13 @@ def spin_up_cluster(n_workers):
 @click.option('--source_id', default='CanESM5', help='source_id')
 @click.option('--n_workers', default=6, help='Number of workers to spin up')
 def wrapper(source_id, n_workers):
-    flow.run(source_id=source_id)
-    
     client, cluster = spin_up_cluster(n_workers)
+    
+    flow.run(source_id=source_id)
     
     coiled.delete_cluster(name=cluster.name)
     client.close()
 
-
-
-    
     
 if __name__ == '__main__':
     wrapper()
