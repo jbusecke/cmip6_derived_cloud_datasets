@@ -41,12 +41,19 @@ jobs:
         USER: ${{secrets.COILED_USER}}
         TOKEN: ${{secrets.COILED_TOKEN}}
       run: coiled login -a "$USER" -t "$TOKEN"
+    - name: Set cluster size based on source_id
+      run: |
+          if [[ ${{matrix.source_id}} == 'GFDL-CM4' || ${{matrix.source_id}} == 'GFDL-CM4']]; then
+              echo "N_WORKER=12" >> "$GITHUB_ENV"
+          else
+              echo "N_WORKER=6" >> "$GITHUB_ENV"
+          fi
     - name: Run Script
       env:
         KEY: ${{secrets.S3_KEY}}
         SECRET: ${{secrets.S3_SECRET}}
         TEST: "Just a TEST"
-      run: python production_test_env.py --source_id=${{matrix.source_id}}
+      run: python production_test_env.py --source_id=${{matrix.source_id}} --n_workger=${{env.N_WORKER}}
 #     - name: Setup upterm session
 #       uses: lhotari/action-upterm@v1
 #     - name: Install package
