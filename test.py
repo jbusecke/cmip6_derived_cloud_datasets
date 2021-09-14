@@ -48,19 +48,11 @@ def store_zarr(ds, ofolder):
     print('DOES THIS WORK?', os.environ['TEST'])
     # for testing just average the first 12 steps
     ds = ds.isel(time=slice(0,240))
-#     filename = 'short_'+ cmip6_dataset_id(ds) +'.zarr'
-
-#     mapper = fsspec.get_mapper(ofolder+'/'+filename)
-#     print(f"Saving to {str(mapper)}")
-#     ds.to_zarr(mapper, mode='w')
-#     return str(mapper)
-
-    # drop in replacement (just load for now, not save)
-    ds = ds.load()
-    print(ds)
-    return ds
-
     
+    mapper = fs.get_mapper(ofolder+'/'+filename)
+    
+    print(f"Saving to {str(mapper)}")
+    ds.to_zarr(mapper, mode='w')
     
 with Flow("Test-Mean-CMIP6") as flow:
     ofolder = Parameter("ofolder", default=None)
@@ -77,6 +69,15 @@ with Flow("Test-Mean-CMIP6") as flow:
         grid_label=grid_label,
         table_id = table_id
     )
+    
+    fs = fsspec.filesystem(
+        's3',
+        anon=False, 
+        key=os.environ['KEY'], 
+        secret=os.environ['SECRET']
+    )
+    filename = 'short_'+ cmip6_dataset_id(ds) +'.zarr'
+    ofolder = f's3://cmip6derivedtestacce-onbwidnxcpr9pskoen9asgg97wucnusw2b-s3alias/test_short'
     
     mapped_means = naive_mean.map(ds=datasets)
     mapped_mean_clean = clean_ds_attrs.map(ds=mapped_means)
