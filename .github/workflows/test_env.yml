@@ -1,61 +1,61 @@
-# name: Test Flow with conda Env
-# on: [push]
-# jobs:
-#   build:
-#     defaults:
-#       run:
-#         shell: bash -l {0}
-#     runs-on: ubuntu-latest
-#     strategy:
-#        fail-fast: false
-#        matrix:
-#          source_id: ["CanESM5", "GFDL-ESM4", "GFDL-CM4"]
-#     name: Build (${{ matrix.source_id }})
-#     steps:
-#     - name: Cancel previous runs
-#       uses: styfle/cancel-workflow-action@0.9.1
-#       with:
-#         access_token: ${{ github.token }}
-#     - uses: actions/checkout@v2
-#     - name: Cache conda
-#       uses: actions/cache@v2.1.6
-#       env:
-#         # Increase this value to reset cache if ci/environment.yml has not changed
-#         CACHE_NUMBER: 0
-#       with:
-#         path: ~/conda_pkgs_dir
-#         key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('environment.yml') }}
-#     - uses: conda-incubator/setup-miniconda@v2
-#       with: 
-#         activate-environment: cmip6_derived_cloud_datasets
-#         auto-update-conda: false
-#         channels: conda-forge
-#         mamba-version: '*'
-#         channel-priority: strict
-#         python-version: 3.9
-#         environment-file: environment.yml
-#         use-only-tar-bz2: true # IMPORTANT: This needs to be set for caching to work properly!
-#     - name: Check enviroment
-#       run: conda list
-#     - name: Login to Coiled
-#       env:
-#         USER: ${{secrets.COILED_USER}}
-#         TOKEN: ${{secrets.COILED_TOKEN}}
-#       run: coiled login -a "$USER" -t "$TOKEN"
-#     - name: Set cluster size based on source_id
-#       run: |
-#           if [[ "${{matrix.source_id}}" == "GFDL-CM4" ]] || [[ "${{matrix.source_id}}" == "GFDL-ESM4" ]] ; then
-#               echo "N_WORKERS=12" >> "$GITHUB_ENV"
-#           else
-#               echo "N_WORKERS=6" >> "$GITHUB_ENV"
-#           fi
-#     - name: Run Script
-#       env:
-#         KEY: ${{secrets.S3_KEY}}
-#         SECRET: ${{secrets.S3_SECRET}}
-#         TEST: "Just a TEST"
-#       run: python production_test_env.py --source_id=${{matrix.source_id}} --n_workers=${{env.N_WORKERS}}
-# #     - name: Setup upterm session
-# #       uses: lhotari/action-upterm@v1
-# #     - name: Install package
-# #       run: python -m pip install -e . --no-deps --force-reinstall
+name: Test Flow with conda Env
+on: [push]
+jobs:
+  build:
+    defaults:
+      run:
+        shell: bash -l {0}
+    runs-on: ubuntu-latest
+    strategy:
+       fail-fast: false
+       matrix:
+         source_id: ["CanESM5", "GFDL-ESM4", "GFDL-CM4"]
+    name: Build (${{ matrix.source_id }})
+    steps:
+    - name: Cancel previous runs
+      uses: styfle/cancel-workflow-action@0.9.1
+      with:
+        access_token: ${{ github.token }}
+    - uses: actions/checkout@v2
+    - name: Cache conda
+      uses: actions/cache@v2.1.6
+      env:
+        # Increase this value to reset cache if ci/environment.yml has not changed
+        CACHE_NUMBER: 0
+      with:
+        path: ~/conda_pkgs_dir
+        key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('environment.yml') }}
+    - uses: conda-incubator/setup-miniconda@v2
+      with: 
+        activate-environment: cmip6_derived_cloud_datasets
+        auto-update-conda: false
+        channels: conda-forge
+        mamba-version: '*'
+        channel-priority: strict
+        python-version: 3.9
+        environment-file: environment.yml
+        use-only-tar-bz2: true # IMPORTANT: This needs to be set for caching to work properly!
+    - name: Check enviroment
+      run: conda list
+    - name: Login to Coiled
+      env:
+        USER: ${{secrets.COILED_USER}}
+        TOKEN: ${{secrets.COILED_TOKEN}}
+      run: coiled login -a "$USER" -t "$TOKEN"
+    - name: Set cluster size based on source_id
+      run: |
+          if [[ "${{matrix.source_id}}" == "GFDL-CM4" ]] || [[ "${{matrix.source_id}}" == "GFDL-ESM4" ]] ; then
+              echo "N_WORKERS=12" >> "$GITHUB_ENV"
+          else
+              echo "N_WORKERS=6" >> "$GITHUB_ENV"
+          fi
+    - name: Run Script
+      env:
+        KEY: ${{secrets.S3_KEY}}
+        SECRET: ${{secrets.S3_SECRET}}
+        TEST: "Just a TEST"
+      run: python production_test_env.py --source_id=${{matrix.source_id}} --n_workers=${{env.N_WORKERS}}
+#     - name: Setup upterm session
+#       uses: lhotari/action-upterm@v1
+#     - name: Install package
+#       run: python -m pip install -e . --no-deps --force-reinstall
